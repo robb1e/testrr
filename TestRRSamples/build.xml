@@ -1,0 +1,40 @@
+<project name="TestRRSamples" default="develop">
+	<record name="${basedir}/build.log" loglevel="verbose" />
+
+	<property name="src" value="${basedir}/src/java" />
+	<property name="build" value="${basedir}/build"/>
+	<property name="build.main" location="${build}/classes/main"/>
+
+	<property name="lib" value="${basedir}/lib" />
+	<property name="resources" value="${basedir}/src/properties" />
+
+	<path id="project.classpath">
+		<pathelement location="${resources}"/>
+		<pathelement location="${build.main}"/>
+		<fileset dir="${lib}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="develop" depends="clean, compile, run" />
+
+	<target name="clean">
+		<delete dir="${build}" />
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${build.main}"/>
+		<javac includes="**/*.java" debug="true" destdir="${build.main}">
+			<src path="${src}" />
+			<classpath refid="project.classpath" />
+		</javac>
+		<copy file="${src}/applicationContext.xml" todir="${build.main}" />
+		<copy file="${src}/mockphoneApplicationContext.xml" todir="${build.main}" />
+	</target>
+	
+	<target name="run" depends="compile">
+		<java classname="com.ragstorooks.samples.Main" fork="true">
+			<classpath refid="project.classpath" />
+		</java>
+	</target>
+</project>

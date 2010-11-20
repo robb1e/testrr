@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+              http://www.springframework.org/schema/beans/spring-beans.xsd
+              http://www.springframework.org/schema/aop
+              http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+  <!-- Load properties file into the spring context -->
+  <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+	<property name="ignoreResourceNotFound" value="true"/>
+	<property name="ignoreInvalidKeys" value="true"/>
+  	<property name="locations">
+  	  <list>
+  		<value>classpath:rpsamples.mockphone.properties</value>
+  	  </list>
+  	</property>
+  </bean>
+  
+  <!-- Import for Aloha beans and mockphones -->
+  <import resource="classpath:core-ctx.xml" />
+  <import resource="classpath:memory-collections-ctx.xml" />
+  <import resource="classpath:mockphone-ctx.xml" />
+
+  <bean id="busyMockphoneRule" class="com.bt.aloha.dialog.IncomingDialogRouterRule">
+	<property name="rulePattern" value=".*busy.*" />
+	<property name="dialogSipBean" ref="busyMockphoneBean" />
+  </bean>
+
+  <bean id="happyMockphoneRule" class="com.bt.aloha.dialog.IncomingDialogRouterRule">
+	<property name="rulePattern" value=".*happy.*" />
+	<property name="dialogSipBean" ref="hangUpMockphoneBean" />
+	<property name="dialogProperties">
+	  <props>
+		<prop key="hang.up.period">60000</prop>
+		<prop key="prop.ordering">hang.up.period</prop>
+	  </props>
+	</property>
+  </bean>
+
+  <bean id="dialogRouter" class="com.bt.aloha.testing.mockphones.MockphonesRouter">
+	<constructor-arg index="0">
+	  <list>
+		<ref local="busyMockphoneRule"/>
+		<ref local="happyMockphoneRule"/>
+	  </list>
+	</constructor-arg>
+  </bean>
+</beans>

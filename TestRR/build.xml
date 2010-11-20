@@ -1,0 +1,185 @@
+<!--
+Copyright 2008 Raghav Ramesh
+
+This file is part of TestRR.
+
+TestRR is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+TestRR is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with TestRR.  If not, see <http://www.gnu.org/licenses/>.
+-->    	
+    	
+<project name="TestRR" default="develop">
+	<record name="${basedir}/build.log" loglevel="verbose" />
+
+	<property name="src" value="${basedir}/src/java" />
+	<property name="build" value="${basedir}/build"/>
+	<property name="classes" location="${build}/classes"/>
+	<property name="build.main" location="${build}/classes/main"/>
+	<property name="build.test" location="${build}/classes/test"/>
+
+	<property name="dist" value="${basedir}/dist" />
+	<property name="lib" value="${basedir}/lib" />
+	<property name="doc" value="${basedir}/doc" />
+	<property name="zip" value="${basedir}/zip" />
+	<property name="test" value="${basedir}/src/test" />
+	<property name="resources" value="${basedir}/src/properties" />
+    
+    <property file="properties/${user.name}.properties" />
+	<property file="properties/build.properties" />
+
+	<path id="project.classpath">
+		<pathelement location="${resources}"/>
+		<fileset dir="${lib}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<taskdef classpathref="project.classpath" resource="tasks.properties" />
+
+	<target name="develop" depends="clean, init, compile, test, findbugs, jar, copy, dist" />
+
+	<target name="distribute" depends="clean, init, compile, jar, copy, javadoc, dist" />
+
+	<dirname property="pwd" file="${ant.file}" />
+
+	<property name="coverage.file" value="${build}/coverage/cobertura.ser" />
+
+	<target name="clean">
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+		<delete dir="${zip}" />
+		<delete file="${coverage.file}" />
+	</target>
+
+	<target name="init">
+		<mkdir dir="${zip}"/>
+	</target>
+
+	<target name="copy">
+		<copy todir="${zip}/${ant.project.name}">
+			<fileset dir="${doc}" includes="COPYING*" />
+			<fileset dir="${doc}" includes="README" />
+		</copy>
+		<copy file="${build}/${ant.project.name}.jar" todir="${zip}/${ant.project.name}"/>
+	</target>
+	
+	<target name="compile" depends="init">
+		<mkdir dir="${build.main}"/>
+		<javac includes="**/*.java" debug="true" destdir="${build.main}">
+			<src path="${src}" />
+			<classpath refid="project.classpath" />
+		</javac>
+
+		<mkdir dir="${build.test}"/>
+		<javac debug="true" destdir="${build.test}">
+			<src path="${test}"/>
+			<classpath path="${build.main}"/>
+			<classpath path="${resources}"/>
+			<classpath refid="project.classpath" />
+		</javac>
+	</target>
+
+	<target name="instrument" depends="compile">
+		<property name="instrumentExcludes" value="**/*Test.*" />
+		<mkdir dir="${build}/coverage" />
+		<cobertura-instrument todir="${build}/coverage/classes" datafile="${coverage.file}">
+			<fileset dir="${build.main}" excludes="${instrumentExcludes}">
+				<include name="**/*.class" />
+			</fileset>
+			<classpath>
+				<path refid="project.classpath" />
+			</classpath>
+		</cobertura-instrument>
+	</target>
+
+	<target name="test" depends="instrument">
+		<taskdef classpathref="project.classpath" resource="tasks.properties" />
+		<mkdir dir="${build}/test" />
+		<dirname property="pwd" file="${ant.file}" />
+		<junit printsummary="yes" errorproperty="test.fail" failureproperty="test.fail" fork="yes" showoutput="yes">
+			<sysproperty key="net.sourceforge.cobertura.datafile" file="${coverage.file}" />
+			<sysproperty key="build.dir" value="${pwd}" />
+			<formatter type="xml" />
+			<batchtest todir="${build}/test">
+				<fileset dir="${test}" includes="**/*Test*.java"/>
+			</batchtest>
+			<classpath>
+				<pathelement location="${build}/coverage/classes" />
+				<pathelement location="${build.main}"/>
+				<pathelement location="${build.test}"/>
+				<path refid="project.classpath" />
+				<pathelement location="${junit}" />
+			</classpath>
+		</junit>
+		<mkdir dir="${build}/test/html" />
+		<junitreport todir="${build}/test">
+			<fileset dir="${build}/test">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report todir="${build}/test/html" />
+		</junitreport>
+
+		<cobertura-report destdir="${build}/coverage/xml" datafile="${coverage.file}" format="xml">
+			<fileset dir="${src}"/>
+			<classpath refid="project.classpath" />
+		</cobertura-report>
+		<cobertura-report datafile="${coverage.file}" destdir="${build}/coverage/html">
+			<fileset dir="${src}"/>
+			<classpath refid="project.classpath" />
+		</cobertura-report>
+
+		<fail if="test.fail" message="Tests failed, see reports for details" />
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar destfile="${build}/${ant.project.name}.jar" basedir="${build.main}"/>
+	</target>
+
+	<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpath="${lib}/findbugs-ant.jar" />
+
+	<target name="findbugs" depends="jar">
+		<property name="findbugs.path" value="${build}/findbugs" />
+		<mkdir dir="${findbugs.path}" />
+		<findbugs home="${findbugs.home}" reportLevel="low" failOnError="true" warningsProperty="findbugs.generated.warnings" output="html" outputFile="${findbugs.path}/index.html">
+			<auxClasspath refid="project.classpath"/>
+			<sourcePath path="${src}" />
+			<class location="${build}/classes/main"/>
+		</findbugs>
+	</target>
+
+	<target name="javadoc" >
+		<mkdir dir="${zip}/${ant.project.name}/docs/api"/>
+		<javadoc destdir="${zip}/${ant.project.name}/docs/api"	windowtitle="TestRR API">
+			<fileset dir="${basedir}/src/java">
+				<include name="com/ragstorooks/testrr/*.java"/>
+			</fileset>
+			<classpath>
+				<fileset dir="${basedir}/lib">
+					<include name="**/*.jar" />
+				</fileset>
+				<pathelement location="${basedir}/src/java"/>
+			</classpath>
+		</javadoc>
+	</target>
+
+	<target name="stampLabel" unless="label" >
+	    <tstamp>
+            <format property="timestamp" pattern="yyyyMMddhhmmss"/>
+        </tstamp>
+        <property name="label" value="${ant.project.name}-${timestamp}" />
+	</target>
+	
+	<target name="dist" depends="jar, copy, stampLabel">
+		<mkdir dir="dist"/>
+		<zip destfile="dist/${label}.zip" basedir="zip"/>
+	</target>
+</project>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+              http://www.springframework.org/schema/beans/spring-beans.xsd
+              http://www.springframework.org/schema/aop
+              http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+  <!-- Load properties file into the spring context -->
+  <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+	<property name="ignoreResourceNotFound" value="true"/>
+	<property name="ignoreInvalidKeys" value="true"/>
+  	<property name="locations">
+  	  <list>
+  		<value>classpath:rpsamples.properties</value>
+  	  </list>
+  	</property>
+  </bean>
+  
+  <!-- Scenario runner -->
+  <bean id="scenarioRunner" class="com.ragstorooks.testrr.Runner">
+  	<property name="numberOfRuns" value="500" />
+  	<property name="numberOfConcurrentStarts" value="5" />
+  	<property name="coolDownPeriod" value="60000" />
+  	<property name="synchronizedScheduling" value="false" />
+	<property name="scheduledExecutorService" ref="scheduledExecutorService" />
+  </bean>
+  
+  <bean id="scheduledExecutorService" class="org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean" >
+	<property name="continueScheduledExecutionAfterException" value="true" />
+	<property name="poolSize" value="10" />
+  </bean>
+
+  <!-- Scenario beans -->
+  <bean id="createCallScenario" class="com.ragstorooks.samples.scenarios.CreateCall">
+    <property name="outboundCallLegBean" ref="outboundCallLegBean"/>
+    <property name="callBean" ref="callBean"/>
+  </bean>
+
+  <bean id="busyCallLegScenario" class="com.ragstorooks.samples.scenarios.BusyCallLeg">
+    <property name="outboundCallLegBean" ref="outboundCallLegBean"/>
+  </bean>
+
+  <!-- Import for Aloha beans and mockphones -->
+  <import resource="classpath:core-ctx.xml" />
+  <import resource="classpath:memory-collections-ctx.xml" />
+
+  <!-- Aloha beans -->
+  <bean id="outboundCallLegBean" class="com.bt.aloha.callleg.OutboundCallLegBeanImpl" />
+
+  <bean id="callBean" class="com.bt.aloha.call.CallBeanImpl" >
+    <property name="outboundCallLegBean" ref="outboundCallLegBean" />
+  </bean>
+</beans>

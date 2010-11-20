@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/java"/>
+	<classpathentry kind="src" path="src/properties"/>
+	<classpathentry kind="lib" path="lib/spring-2.0.5.jar"/>
+	<classpathentry kind="lib" path="lib/SimpleSipStack-build.511.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jain-sip-api-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/jain-sip-ri-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/nist-sdp-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/pe-sdk-common.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.14.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="lib/TestRR.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
