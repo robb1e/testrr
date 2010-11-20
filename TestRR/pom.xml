@@ -1,0 +1,94 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.ragstorooks</groupId>
+    <artifactId>testrr</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>Robustness testing framework</name>
+
+    <properties>
+        <mockito.version>1.8.2</mockito.version>
+        <junit.version>4.7</junit.version>
+        <test.support.version>1.18</test.support.version>
+        <slf4j.version>1.6.0</slf4j.version>
+    </properties>
+
+	<build>
+	  <sourceDirectory>src/java</sourceDirectory>
+	  <testSourceDirectory>src/test</testSourceDirectory>
+	  <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.0.2</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+    </plugins>
+	</build>
+
+    <dependencies>
+
+        <!-- NB: as a good citizen this library depends only on the slf4j API.
+          It's up to users of the library to pick their implementor -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- when running tests ONLY, use the simple slf4j logger implementation -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <distributionManagement>
+        <!-- to do a release, you will need to clone  git@github.com:guardian/guardian.github.com.git
+         to a directory under your home directory.  After release:perform, add commit & push -->
+        <repository>
+            <id>guardian-github-releases</id>
+            <url>file:///${user.home}/guardian.github.com/maven/repo-releases</url>
+        </repository>
+    </distributionManagement>
+
+    <scm>
+        <connection>scm:git:http://github.com/robb1e/testrr.git</connection>
+        <developerConnection>scm:git:git://git@github.com/robb1e/testrr.git</developerConnection>
+        <url>http://github.com/robb1e/testrr</url>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>GPL3</name>
+            <url>http://gplv3.fsf.org</url>
+        </license>
+    </licenses>
+
+    <repositories>
+        <repository>
+            <id>guardian-github-releases</id>
+            <url>http://guardian.github.com/maven/repo-releases</url>
+        </repository>
+    </repositories>
+
+
+</project>

@@ -21,8 +21,8 @@ package com.ragstorooks.testrr;
 
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class that every scenario should extend. This class provides some basic constructs that are common to all scenarios.
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  * able to store the execution states of multiple scenario instances.  
  */
 public abstract class ScenarioBase {
-	private static final Log log = LogFactory.getLog(ScenarioBase.class);
+	private static final Logger log = LoggerFactory.getLogger(ScenarioBase.class);
 
 	private ScenarioListener scenarioListener;
 	private CountDownLatch startLatch = null;
